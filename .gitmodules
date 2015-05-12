@@ -1,0 +1,4 @@
+[submodule "xscreensaver"]
+	path = xscreensaver
+	url = https://github.com/porridge/xscreensaver
+	branch = master

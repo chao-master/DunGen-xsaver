@@ -1,16 +1,15 @@
-CC=g++
+CC=gcc
 CFLAGS=-O2 -g0 -std=gnu++11 -pedantic -Wall -Wextra
 LDFLAGS=-L/usr/lib64 -lX11
-INCLUDES=-I/usr/local/include -I.
+INCLUDES=-I/usr/local/include -I. -I./xscreensaver/utils -I./xscreensaver/hacks -I./xscreensaver/hacks/glx
 
-BinaryName=dungeon.app
-
+BinaryName=dungeon
 
 OBJS=dungeon.o
 all: $(OBJS) $(BinaryName)
 
 
-%.o:        %.cpp
+%.o:        %.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<
 
 $(BinaryName):

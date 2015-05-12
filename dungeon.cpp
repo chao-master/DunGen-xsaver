@@ -206,7 +206,6 @@ void bringOutYourDead(int grid[][HEIGHT*2+1], int x, int y){
 	if (grid[x][y] == 0) return;
 	if (x==0 || y==0 || x==WIDTH-1 || y == HEIGHT-1) return;
 	int s = grid[x-1][y]+grid[x+1][y]+grid[x][y-1]+grid[x][y+1];
-	//std::cerr << s << "|" << grid[x][y] << std::endl;
 	if (s==grid[x][y]){
 		grid[x][y] = 0;
 		paintFrame(grid,DELAY_DEAD,true);

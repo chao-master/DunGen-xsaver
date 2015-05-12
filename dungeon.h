@@ -3,12 +3,12 @@ const int MIN_SIZE = 2;
 const int WIDTH = 200;
 const int HEIGHT = 200;
 const int ROOM_TRIES = 500;
-const int LOOP_FAC = 1000000;
+const int LOOP_FAC = 10000;
 
-const int DELAY_ROOM = 10;
-const int DELAY_PATH = 2;
-const int DELAY_CONN = 50;
-const int DELAY_DEAD = 2;
+const int DELAY_ROOM = 5;
+const int DELAY_PATH = 1;
+const int DELAY_CONN = 1;
+const int DELAY_DEAD = 1;
 
 void manyRooms(int[][HEIGHT*2+1]);
 void room(int[][HEIGHT*2+1],int,int,int,int,int);

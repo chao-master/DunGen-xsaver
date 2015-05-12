@@ -1,7 +1,9 @@
-//#include "screenhack.h"
-#include <X11/Xlib.h>
+#include "screenhack.h"
+//#include <X11/Xlib.h>
 
 #define STACK_MAX 256
+
+typedef enum { false, true } bool;
 
 struct state {
 	Display *dpy;
@@ -9,7 +11,7 @@ struct state {
 	int xlim, ylim;
 	Colormap cmap;
 
-	int grid[];
+	int grid[200][200];
 	int x,y;
 	int action;
 
@@ -24,12 +26,9 @@ struct state {
 	int fillTraceY[STACK_MAX];
 	int fillTraceTop;
 
-	int partNo;
+	int partNo;	
 };
-
-static int mapIn(int x,int y,state *st){
-	
-}
+bool _calculate(struct state *st);
 
 static void * dungeon_init(Display *dpy, Window window){
 	struct state *st = (struct state *) calloc (1,sizeof(*st));
@@ -46,16 +45,10 @@ static void * dungeon_init(Display *dpy, Window window){
 
 	st->maxSize = get_integer_resource (st->dpy, "maxSize", "Integer");
 	st->minSize = get_integer_resource (st->dpy, "minSize", "Integer");
-	st->width = get_integer_resource (st->dpy, "width", "Integer");
-	st->height = get_integer_resource (st->dpy, "height", "Integer");
+	st->width = 200;//get_integer_resource (st->dpy, "width", "Integer");
+	st->height = 200;//get_integer_resource (st->dpy, "height", "Integer");
 	st->roomTries = get_integer_resource (st->dpy, "roomTries", "Integer");
 	st->loopFac = get_integer_resource (st->dpy, "loopFac", "Integer");
-
-
-
-	int grid[st->width*2+1][st->heigth*2+1] = {0};
-	st->grid = grid;
-	st->action = 0;
 
 	return st;
 }
@@ -65,29 +58,30 @@ static unsigned long dungeon_draw(Display *dpy, Window window, void *closure){
 	_calculate(st);
 }
 
-bool _calculate(state *st){
-	case (st->action){
+bool _calculate(struct state *st){
+	switch (st->action){
+		int rW,rH,rX,rY,x,y,gX,gY,c;
+		bool clear;
+
 		//Reinitilise the dungeon floor
 		case 0:
-			XClearWindow(dpy,window)
-			st->grid = {0};
-			st->fillTrace = {0};
-			st->fillTrace = 0;
+			st->fillTraceTop = 0;
 			st->partNo = 1;
 			st->action ++;
 			st->x = 0;
 			st->y = 0;
-			return false
+			return false;
 		//Placing rooms
 		case 1:
-			int rW = random()%(st->maxSize-st->minSize)+st->minSize;
-			int rh = random()%(st->maxSize-st->minSize)+st->minSize;
-			int rX = random()%(st->width-w);
-			int rY = random()%(st->height-h);
-			bool clear = true;
-			for(int i=rX;i<=rX+rW;i++){
-				for(int j=rY;j<=y+rH;j++){
-					if (grid[i*2+1][j*2+1]){
+			rW = random()%(st->maxSize-st->minSize) + st->minSize;
+			rH = random()%(st->maxSize-st->minSize) + st->minSize;
+			rX = random()%(st->width-rW);
+			rY = random()%(st->height-rH);
+			clear = true;
+			int i,j;
+			for(i=rX;i<=rX+rW;i++){
+				for(j=rY;j<=y+rH;j++){
+					if (st->grid[i*2+1][j*2+1]){
 						clear = false;
 						break;
 					}
@@ -95,40 +89,39 @@ bool _calculate(state *st){
 				if (!clear) break;
 			}
 			if (clear){
-				for(int i=rX*2+1;i<=(rX+rW)*2+1;i++){
-					for(int j=rY*2+1;j<=(rY+rH)*2+1;j++){
-						grid[i][j] = st->partNo;
+				for(i=rX*2+1;i<=(rX+rW)*2+1;i++){
+					for(j=rY*2+1;j<=(rY+rH)*2+1;j++){
+						st->grid[i][j] = st->partNo;
 					}
 				}
 			}
 			st->partNo++;
 			if(st->partNo > st->roomTries) st->action ++;
-			return clear
+			return clear;
 		//Locate somewhere we can start a coridoor
 		case 2:
 			for( ; st->x < st->width; st->x++){
 				for( ; st->y < st->height; st->y++){
-					st->lastDir = -1;
-					st->state = 3;
+					st->action = 3;
 					st->fillTraceX[0] = st->x;
 					st->fillTraceY[0] = st->y;
 					st->fillTraceTop = 0;
 					st->partNo++;
-					grid[st->x][st->y] = partNo;
+					st->grid[st->x][st->y] = st->partNo;
 					return true;
 				}
 				st->y = 0;
 			}
-			st->state = 4;
+			st->action = 4;
 			return false;
 		//Moving along the coridoor
 		case 3:
-			int x = st->fillTraceX[st->fillTraceTop];
-			int y = st->fillTraceY[st->fillTraceTop];
+			x = st->fillTraceX[st->fillTraceTop];
+			y = st->fillTraceY[st->fillTraceTop];
 
-			int gX=0;
-			int gY=0;
-			int c=0;
+			gX=0;
+			gY=0;
+			c=0;
 
 			if (st->fillTraceTop < STACK_MAX-1){
 				if (x > 0 && !st->grid[(x-1)*2+1][y*2+1] && (random()%(++c) == 0)){
@@ -151,7 +144,7 @@ bool _calculate(state *st){
 			if (c==0){ //No where to go, backtrack
 				st->fillTraceTop--;
 				if (st->fillTraceTop<0){
-					st->state = 2;
+					st->action = 2;
 				}
 				return false;
 			}
@@ -163,11 +156,12 @@ bool _calculate(state *st){
 			return true;
 		//Merge things?
 		case 4:
-
+		break;
 		//Remove deadends
 		case 5:
-
+		break;
 		//Just look at how nice it is
 		case 6:
+		break;
 	}
 }

@@ -28,7 +28,7 @@ struct state {
 
 	int partNo;	
 };
-bool _calculate(struct state *st);
+static bool _calculate(struct state *st);
 
 static void * dungeon_init(Display *dpy, Window window){
 	struct state *st = (struct state *) calloc (1,sizeof(*st));
@@ -58,7 +58,7 @@ static unsigned long dungeon_draw(Display *dpy, Window window, void *closure){
 	_calculate(st);
 }
 
-bool _calculate(struct state *st){
+static bool _calculate(struct state *st){
 	switch (st->action){
 		int rW,rH,rX,rY,x,y,gX,gY,c;
 		bool clear;
@@ -165,3 +165,29 @@ bool _calculate(struct state *st){
 		break;
 	}
 }
+
+
+
+
+static void dungeon_reshape (Display *dpy, Window window, void *closure, unsigned int w, unsigned int h){}
+static Bool dungeon_event (Display *dpy, Window window, void *closure, XEvent *event){return False;}
+static void dungeon_free (Display *dpy, Window window, void *closure){}
+
+static const char *dungeon_defaults [] = {
+  ".background:	black",
+  ".foreground:	white",
+  "*fpsSolid:	true",
+  "*delay:	10000",
+  "*grey:	false",
+  0
+};
+
+static XrmOptionDescRec dungeon_options [] = {
+  { "-delay",		".delay",	XrmoptionSepArg, 0 },
+  { "-grey",		".grey",	XrmoptionNoArg, "True" },
+  { 0, 0, 0, 0 }
+};
+
+
+
+XSCREENSAVER_MODULE ("dungeon", dungeon)
